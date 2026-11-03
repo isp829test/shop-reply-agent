@@ -109,3 +109,19 @@ def test_fake_agent_is_compatible():
     agent = FakeAgent("x", "hello")
     response = asyncio.run(agent.run("hi"))
     assert response.text == "hello"
+
+
+def test_writer_refund_flag_is_strict():
+    from app.agents import parse_writer
+
+    def flag(value):
+        import json
+        return parse_writer(json.dumps({"reply": "안내드립니다.", "needs_refund": value}))["needs_refund"]
+
+    assert flag(True) is True
+    assert flag("true") is True
+    assert flag(False) is False
+    assert flag("false") is False
+    assert flag("False") is False
+    assert flag(1) is False
+    assert flag(None) is False
