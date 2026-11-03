@@ -295,6 +295,13 @@ def parse_triage(text: str) -> dict[str, Any]:
     return {"category": category, "anger": anger, "summary": summary}
 
 
+def _strict_bool(value: Any) -> bool:
+    """true(불리언) 또는 문자열 "true"만 참으로 본다. "false" 같은 문자열을 참으로 읽지 않는다."""
+    if isinstance(value, bool):
+        return value
+    return isinstance(value, str) and value.strip().lower() == "true"
+
+
 def parse_writer(text: str) -> dict[str, Any] | None:
     data = extract_json(text)
     if not data or not str(data.get("reply") or "").strip():
@@ -302,7 +309,7 @@ def parse_writer(text: str) -> dict[str, Any] | None:
     citations = data.get("citations") if isinstance(data.get("citations"), list) else []
     return {
         "reply": str(data["reply"]).strip(),
-        "needs_refund": bool(data.get("needs_refund")),
+        "needs_refund": _strict_bool(data.get("needs_refund")),
         "refund_reason": str(data.get("refund_reason") or "").strip(),
         "citations": [c for c in citations if isinstance(c, dict)],
     }
